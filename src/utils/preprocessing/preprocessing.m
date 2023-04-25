@@ -1,10 +1,13 @@
 
-clear all;
-close all;
+% clear all; close all;
+
+% Global variables
+dataDir = "../../../data/raw/";
+processedDataDir = "../../../data/preprocessed/";
 
 % load the data
-filename = "Sa230216_s611_focusTwoJoystickTask_0005_datM1";
-load(filename);
+filename = "Sa230414_s640_focusTwoJoystickTask_0001_datM1";
+load(dataDir + filename);
 % the data structure
 % datOutM1: 1 * ntrials : struct array with the fields:
 %   block: 1 * 1 : double
@@ -40,15 +43,17 @@ load(filename);
 %% convert the data to the format
 % the data structure
 % trialData: ntrials * 1 : struct array with the fields:
+%   trial: 1 * 1 : int : the trial number
 %   rewardLabel : 1 * 1 : double : the reward amount
 %   directionLabel : 1 * 1 : double : the target direction
 %   targetSizeLabel : 1 * 1 : double : the target size
 %   focusDifficultyLabel : 1 * 1 : double : the difficulty of the task
-%   firingRate : nchannels * ntimes : int : the firing rate of each channel (sampled at 1000Hz)
-%   time : 1 * ntimes : double : the time of each sample (sampled at 1000Hz) start from 0
+%   catchLabel : 1 * 1 : int : whether it is a catch trial
 %   startTime : 1 * 1 : double : the start time of the trial
 %   endTime : 1 * 1 : double : the end time of the trial
 %   stateTable: 2 * nevents : int : the first row is the event code and the second row is the time
+%   firingRate : nchannels * ntimes : int : the firing rate of each channel (sampled at 1000Hz)
+%   time : 1 * ntimes : double : the time of each sample (sampled at 1000Hz) start from 0
 %   (time stamp of new sampleing rate: 1000Hz)
 %   handKinematics: struct array with the fields:
 %     position: 2 * ntimes : double : the first row is the x position and the second row is the y position
@@ -99,7 +104,7 @@ for i = 1:ntrials
     % put the spikes based on the spikesTimeDiff and spikeinfo
 
     ntime = ceil((datOutM1(i).time(2)-datOutM1(i).time(1))*newFs);
-    nchannel = size(datOutM1(i).channels,1);
+    nchannel = length(taskInfo.channels);
     firingRate = logical(zeros(nchannel,ntime));
     startTimeFs = ceil(datOutM1(i).time(1)*fs);
 
@@ -140,6 +145,7 @@ for i = 1:ntrials
     stateTable = zeros(2,0);
     handKinematics.position = zeros(ntime, 2);
     catchLabel = 0;
+    delayLength = NaN;
     j = 1;
     while j < size(trialCode,1)
         if trialCode(j, 1) == 142
@@ -153,8 +159,22 @@ for i = 1:ntrials
             
             j = j + 3;
         elseif trialCode(j,1) == 7777
+            % which means huge target trial
+            % targetSizeLabel = 1;
+            stateTable(1, end+1) = trialCode(j, 1);
+            timeIdx = ceil((trialCode(j, 2) - startTime)*newFs);
+            stateTable(2, end) = timeIdx;
+            j = j + 1;
+        elseif trialCode(j,1) == 5555
             % which means catch trial
             catchLabel = 1;
+            stateTable(1, end+1) = trialCode(j, 1);
+            timeIdx = ceil((trialCode(j, 2) - startTime)*newFs);
+            stateTable(2, end) = timeIdx;
+            j = j + 1;
+        elseif trialCode(j,1) > 2000 && trialCode(j,1) < 4001
+            % which means delay length
+            delayLength = trialCode(j,1) - 2000;
             j = j + 1;
         else
             % extract state table
@@ -167,22 +187,28 @@ for i = 1:ntrials
             if ~ismember(trialCode(j, 1), stateDict)
                 stateDict = [stateDict, trialCode(j, 1)];
             end
+            %%%%%
 
             j = j + 1;
         end
     end
 
+%     if targetSizeLabel == 1 & all(ismember([11 159], trialCode(:, 1))) == 1
+%         disp("this huge target trial have 11");
+%     end
 
+    trialData(i).trial = i;
     trialData(i).rewardLabel = rewardLabel;
     trialData(i).directionLabel = directionLabel;
     trialData(i).targetSizeLabel = targetSizeLabel;
     trialData(i).focusDifficultyLabel = focusDifficultyLabel;
     trialData(i).catchLabel = catchLabel;
-    trialData(i).firingRate = firingRate;
-    trialData(i).time = linspace(0, ntime*1/newFs, ntime);
+    trialData(i).delayLength = delayLength;
     trialData(i).startTime = startTime;
     trialData(i).endTime = endTime;
     trialData(i).stateTable = stateTable;
+    trialData(i).firingRates = firingRate;
+    trialData(i).time = linspace(0, ntime*1/newFs, ntime);
     trialData(i).handKinematics = handKinematics;
 
 end
@@ -193,4 +219,4 @@ stateDict = sort(stateDict);
 % the name of the file is the first two components (separated by '_') of the file name
 fileInfo = strsplit(filename,'_');
 saveFileName = fileInfo{1} + "_" + fileInfo{2} + ".mat";
-save(saveFileName, 'trialData', 'taskInfo');
+save(processedDataDir+saveFileName, 'trialData', 'taskInfo');
