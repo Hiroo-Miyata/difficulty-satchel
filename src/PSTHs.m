@@ -4,9 +4,9 @@ dates = ["0216", "0405", "0414"];
 for day = 1:length(dates)
 date = dates(day);
 rootDir = "../";
-% load(rootDir+"data/processed/"+date+"_GC_300_100_11_159.mat");
-load(rootDir+"data/processed/"+date+"_TO_200_500_70.mat");
-outputFolder = "../results/202304w2/PSTHs-TO/"+date;
+load(rootDir+"data/processed/"+date+"_GC_300_100_11_159.mat");
+% load(rootDir+"data/processed/"+date+"_TO_200_500_70.mat");
+outputFolder = "../results/202304w2/PSTHs-GC/"+date;
 
 % remove calibration part 
 trialNums = [trialData.trial];
@@ -21,7 +21,7 @@ direColors = {[1 .5 .5],[.75 .75 .5],[.5 1 .5],[.25 .75 .5],[0 .5 .5],[0.25 0.25
 trialNums =  [trialData.trial];
 
 % Get data and avg within dir x rew
-analysisBin = (450:650);
+analysisBin = (50:350);
 neuralActivity = cat(3, trialData(:).firingRates);
 [nneurons, ntimeBin ,ntrials] = size(neuralActivity);
 
@@ -47,14 +47,15 @@ for n = 1:nneurons
         sigma = 25;
         kernel = normpdf(-3*sigma:3*sigma,0,sigma);
         Y = conv(Y, kernel, "same");
-        Bin = (100:600);
+        Bin = (50:350);
         plot(Bin, Y(Bin), 'color', rewColors(r,:), 'linewidth', 2)
     end; clear r
     legend(["Small", "Medium", "Large"])
     xlabel("Time (ms)")
     ylabel("Firing Rate (Hz)")
-    xticks([100 200 600])
-    xticklabels(["-100", "TO", "+400"])
+    xticks([50 300 350])
+    xticklabels(["-250", "GC", "+50"])
+    set(gca, 'fontsize', 14, 'fontname', 'arial', 'tickdir', 'out','box','off');
     saveas(gcf, outputFolder+"-neuron"+n+".png")
     close all;
 end; clear n

@@ -5,13 +5,17 @@ Yall = cell(length(dates), 3, 2, 8);
 for day = 1:length(dates)
 date = dates(day);
 rootDir = "../";
-% load(rootDir+"data/processed/"+date+"_GC_300_100_11_159.mat");
-load(rootDir+"data/processed/"+date+"_TO_200_500_70.mat");
-outputFolder = "../results/202304w2/rewardAxis-TO/";
+load(rootDir+"data/processed/"+date+"_GC_300_100_11_159.mat");
+% load(rootDir+"data/processed/"+date+"_TO_200_500_70.mat");
+outputFolder = "../results/202304w4/rewardAxis-GC-trivial-only/";
 
 % remove calibration part 
-trialNums = [trialData.trial];
-trialData = trialData(trialNums > 24);
+% trialNums = [trialData.trial];
+% trialData = trialData(trialNums > 24);
+focusDifficultyLabels = [trialData.focusDifficultyLabel]; focusDifficulties = unique(focusDifficultyLabels); nfocusDifficulties = length(focusDifficulties);
+trialData = trialData(focusDifficultyLabels==focusDifficulties(3) | focusDifficultyLabels==focusDifficulties(4));
+
+
 % Get labels
 directionLabels = [trialData.directionLabel]; directions = unique(directionLabels); ndirections = length(directions);
 rewardLabels = [trialData.rewardLabel]; rewards = unique(rewardLabels); nrewards = length(rewards);
@@ -22,7 +26,7 @@ direColors = {[1 .5 .5],[.75 .75 .5],[.5 1 .5],[.25 .75 .5],[0 .5 .5],[0.25 0.25
 trialNums =  [trialData.trial];
 
 % Get data and avg within dir x rew
-analysisBin = (400:600);
+analysisBin = (150:350);
 neuralActivity = cat(3, trialData(:).firingRates);
 neuralData = mean(neuralActivity(:, analysisBin, :), 2);
 neuralData = squeeze(neuralData)';
