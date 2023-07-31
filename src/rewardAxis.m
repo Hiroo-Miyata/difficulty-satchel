@@ -1,11 +1,12 @@
 close all; clear all;
-dates = ["0216", "0405", "0414"]; ndate = length(dates);
+dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426", "0427", "0428"];
+ndate = length(dates);
 Yall = cell(length(dates), 3, 2, 8);
 
 for day = 1:length(dates)
 date = dates(day);
 rootDir = "../";
-load(rootDir+"data/processed/"+date+"_GC_300_100_11_159.mat");
+load(rootDir+"data/processed/"+date+"_GC_200_100_11159.mat");
 % load(rootDir+"data/processed/"+date+"_TO_200_500_70.mat");
 outputFolder = "../results/202305w2/rewardAxis-GC-2D/";
 

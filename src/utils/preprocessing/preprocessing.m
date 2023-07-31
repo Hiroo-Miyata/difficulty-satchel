@@ -1,13 +1,21 @@
 
-% clear all; close all;
-
+clear all; close all;  addpath(genpath("../plotting/"));
+dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426", "0428"];
+ndates = length(dates);
 % Global variables
 dataDir = "../../../data/raw/";
 processedDataDir = "../../../data/preprocessed/";
 
 % load the data
-filename = "Sa230414_s640_focusTwoJoystickTask_0001_datM1";
-load(dataDir + filename);
+for day = 1:ndates
+date = dates(day);
+rawFile = dir(dataDir + "*" + date + "*.mat");
+load(dataDir + rawFile.name); 
+outputFolder = processedDataDir + date + "/"; makeDir(outputFolder);
+if ~ismember(date, ["0216", "0405", "0414"])
+    datOutM1 = dat; clear dat;
+end
+
 % the data structure
 % datOutM1: 1 * ntrials : struct array with the fields:
 %   block: 1 * 1 : double
@@ -75,6 +83,7 @@ for i = 1:ntrials
     focusDifficultyLabels(i,:) = datOutM1(i).params.trial.focusDifficulty;
 end
 
+taskInfo = datOutM1(1).params;
 taskInfo.rewards = unique(rewardLabels);
 taskInfo.directions = unique(directionLabels);
 taskInfo.targetSizes = unique(targetSizeLabels);
@@ -86,10 +95,18 @@ taskInfo.channels = unique(channelLabels);
 %%%%%
 %for me
 stateDict = [];
+stateTransit = ["0-0"];
+stateTransitLength = cell(1,1);
 %%%%%
 
 
 trialData = struct.empty(ntrials,0);
+neuralData = struct.empty(ntrials,0);
+kinematicData = struct.empty(ntrials,0);
+XPOSData = [];
+YPOSData = [];
+
+spikeInfo.badTrials = false(ntrials, 1);
 for i = 1:ntrials
     reward = datOutM1(i).params.trial.variableRewardIdx;
     rewardLabel = find(taskInfo.rewards == reward);
@@ -99,6 +116,7 @@ for i = 1:ntrials
     targetSizeLabel = find(taskInfo.targetSizes == targetSize);
     focusDifficulty = datOutM1(i).params.trial.focusDifficulty;
     focusDifficultyLabel = find(taskInfo.focusDifficulties == focusDifficulty);
+    block = datOutM1(i).params.trial.currBlock;
 
     % make a matrix of firing rate
     % put the spikes based on the spikesTimeDiff and spikeinfo
@@ -131,7 +149,10 @@ for i = 1:ntrials
             end
             firingRate(channelLabel,spikeTime) = 1;
         else
-            fprintf("spike time is out of range. trial: " + i + ", channel: " + channel + ", spike time: " + spikeTime + "\n");
+            if spikeInfo.badTrials(i) == false
+                fprintf("spike time is out of range. trial: " + i + ", channel: " + channel + ", spike time: " + spikeTime + "\n");
+                spikeInfo.badTrials(i) = true;
+            end
         end
     end
 
@@ -150,12 +171,15 @@ for i = 1:ntrials
     while j < size(trialCode,1)
         if trialCode(j, 1) == 142
             % extract hand kinematics
-            xPos = trialCode(j+1, 1);
-            yPos = trialCode(j+2, 1);
+            xPos = 10000 - trialCode(j+1, 1);
+            yPos = 10000 - trialCode(j+2, 1);
             % get the time
             timeIdx = ceil((trialCode(j, 2) - startTime)*newFs);
             handKinematics.position(timeIdx, 1) = xPos;
             handKinematics.position(timeIdx, 2) = yPos;
+
+            XPOSData = cat(1, XPOSData, xPos);
+            YPOSData = cat(1, YPOSData, yPos);
             
             j = j + 3;
         elseif trialCode(j,1) == 7777
@@ -198,6 +222,7 @@ for i = 1:ntrials
 %     end
 
     trialData(i).trial = i;
+    trialData(i).block = block;
     trialData(i).rewardLabel = rewardLabel;
     trialData(i).directionLabel = directionLabel;
     trialData(i).targetSizeLabel = targetSizeLabel;
@@ -207,16 +232,40 @@ for i = 1:ntrials
     trialData(i).startTime = startTime;
     trialData(i).endTime = endTime;
     trialData(i).stateTable = stateTable;
-    trialData(i).firingRates = firingRate;
     trialData(i).time = linspace(0, ntime*1/newFs, ntime);
-    trialData(i).handKinematics = handKinematics;
+    kinematicData(i).position = handKinematics.position;
+
+    neuralData(i).spikeMatrix = firingRate;
+
+
+    %%% for me
+    for st = 2:size(stateTable, 2)
+        transition = num2str(stateTable(1, st-1)) + "-" + num2str(stateTable(1, st));
+        if ~ismember(transition, stateTransit)
+            stateTransit = cat(1, stateTransit, transition);
+            stateTransitLength{end+1} = [stateTable(2, st) - stateTable(2, st-1)];
+        else
+            idx = find(strcmp(stateTransit, transition));
+            stateTransitLength{idx} = cat(1, stateTransitLength{idx}, stateTable(2, st) - stateTable(2, st-1));
+        end
+    end
 
 end
 
 stateDict = sort(stateDict);
+% for i = 2:length(stateTransit)
+%     % print the state transition name and mean + std of the length
+%     disp(stateTransit(i) + ": " + mean(stateTransitLength{i}) + " +/- " + std(stateTransitLength{i}));
+% end
 
 % save the trialData
 % the name of the file is the first two components (separated by '_') of the file name
-fileInfo = strsplit(filename,'_');
-saveFileName = fileInfo{1} + "_" + fileInfo{2} + ".mat";
-save(processedDataDir+saveFileName, 'trialData', 'taskInfo');
+save(outputFolder+rawFile.name + "_TSK_" + ".mat", 'trialData', 'taskInfo');
+save(outputFolder+rawFile.name + "_NER_" + ".mat", 'neuralData', 'spikeInfo');
+save(outputFolder+rawFile.name + "_KIN_" + ".mat", 'kinematicData');
+
+disp("finished one day preprocessing")
+figure; hold on;
+scatter(XPOSData, YPOSData, 1, 'filled');
+saveas(gcf, "results/handPosition_" + date + ".png"); close all;
+end

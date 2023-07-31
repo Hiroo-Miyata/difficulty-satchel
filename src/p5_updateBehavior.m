@@ -5,43 +5,17 @@ function [trialData] = p5_updateBehavior(trialData,taskInfo)
 % reach endpoint predictions, and rotated kinematics. 
 
 % We need the numbers associated with each state
-if strcmp(taskInfo.subjectName,'Earl')
-    centerAcqState = 2;
-    targetOnsetState = 3;
-    targetOnPostReactionState = 4; % state after target onset
-    goCueState = 5;
-    reachState = 6;
-    targHoldState = 7;
-    rewardState = 8;
-    failStates = [9 10];
-    failTime = 750;
-    targetHoldTime = 400;
-    minPS = 0.1; % minimum peak speed for a trial to be considered a reach
-elseif strcmp(taskInfo.subjectName,'Prez')
-    centerAcqState = 2;
-    targetOnsetState = 3;
-    targetOnPostReactionState = 3; % state after target onset if needed (or if only one target onset state, just use that)
-    goCueState = 4;
-    reachState = 4;
-    targHoldState = 5;
-    rewardState = 7;
-    failStates = [8 9];
-    failTime = taskInfo.failTime;
-    targetHoldTime = taskInfo.targetHoldTime;
-    minPS = 0.075;
-elseif strcmp(taskInfo.subjectName,'Rocky')
-    centerAcqState = 2;
-    targetOnsetState = 3;
-    targetOnPostReactionState = 3; % state after target onset if needed (or if only one target onset state, just use that)
-    goCueState = 4;
-    reachState = 5;
-    targHoldState = 6;
-    rewardState = 7;
-    failStates = [10 11 12 13];
-    failTime = 667; %taskInfo.failTime
-    targetHoldTime = taskInfo.targetHoldTime;
-    minPS = 0.1;
-end
+centerAcqState = 140;
+targetOnsetState = 70;
+targetOnPostReactionState = 3; % state after target onset if needed (or if only one target onset state, just use that)
+goCueState = 11;
+reachState = 5;
+targHoldState = 159;
+rewardState = 150;
+failStates = [151 152 153 154 155 156 160 163];
+failTime = 667; %taskInfo.failTime
+targetHoldTime = taskInfo.targetHoldTime;
+minPS = 0.1;
 
 % Parameters for homing time calc. The behavioral work shows using [1/4 1/3
 % 1/2], [0:0.5:2], and [0:50:250] work for these parameters in any combo
