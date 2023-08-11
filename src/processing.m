@@ -4,9 +4,9 @@ dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426",
 for day = 1:length(dates)
 date = dates(day);
 rootDir = "../";
-target = "GC";
+target = "HT";
 beforeT = 200;
-afterT = 100;
+afterT = 375;
 conditionState = [11 159];
 outputFile = rootDir + "data/processed/" + date + "_"+target+"_"+num2str(beforeT)...
     +"_"+num2str(afterT)+"_"+"11159";
