@@ -11,7 +11,7 @@ function VS_direction(data, rewardLabels, difficultyLabels, directionLabels, opt
         options.RewLegendPos = "south"
     end
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique(rewardLabels); nrewards = length(rewards);
     difficulties = unique(difficultyLabels); ndifficulties = length(difficulties);
     directions = unique(directionLabels); ndirections = length(directions);
@@ -35,7 +35,7 @@ function VS_direction(data, rewardLabels, difficultyLabels, directionLabels, opt
     xlabel("Direction"); ylabel(options.Label); set(gcf,'position',[0,0,550,550]);
     ah1=axes('position',get(gca,'position'),'visible','off');
     legend(ah1,lr,rewardLegends, Location=options.RewLegendPos);
-    legend(lh, ["Tiny", "Huge"], Location=options.DiffLegendPos); 
+    legend(lh, diffLegends, Location=options.DiffLegendPos); 
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     saveas(gcf, options.OutputFolder+"-vs-Direction.jpg");
     close all;

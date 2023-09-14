@@ -1,5 +1,5 @@
 close all; clear all; addpath(genpath("./utils/plotting/"));
-dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426", "0428"];
+dates = ["0417", "0419", "0420"];
 ndates = length(dates);
 folderName = "202307w1-all/neuralData_TargetHold";
 

@@ -13,7 +13,7 @@ function VS_direction_success_rate(failedLabels, rewardLabels, difficultyLabels,
     end
 
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique(rewardLabels); nrewards = length(rewards);
     difficulties = unique(difficultyLabels); ndifficulties = length(difficulties);
     directions = unique(directionLabels); ndirections = length(directions);
@@ -34,7 +34,7 @@ function VS_direction_success_rate(failedLabels, rewardLabels, difficultyLabels,
     set(gca, 'fontsize', 16, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     xlim([0.7 ndirections+.3]); ylim(options.Ylim); xticks(1:ndirections); xticklabels([0 45 90 135 180 225 270 315]);
     xlabel("Direction"); ylabel(options.Label); set(gcf,'position',[0,0,550,550]);
-    legend(lh, ["Tiny", "Huge"], Location=options.DiffLegendPos); ah1=axes('position',get(gca,'position'),'visible','off');
+    legend(lh, diffLegends, Location=options.DiffLegendPos); ah1=axes('position',get(gca,'position'),'visible','off');
     leg2=legend(ah1,lr,rewardLegends, Location=options.RewLegendPos);
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     saveas(gcf, options.OutputFolder+"-vs-Direction.jpg");

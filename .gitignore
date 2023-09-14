@@ -9,6 +9,8 @@
 !/data/preprocessed/emgConfirmPlot/README.md
 /data/processed/*
 !/data/processed/README.md
+/data/old/*
+
 
 /src/*.asv
 /src/utils/preprocessing/*.asv

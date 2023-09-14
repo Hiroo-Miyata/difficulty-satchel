@@ -10,7 +10,7 @@ function VS_reward_size_success_rate(failedLabels, rewardLabels, difficultyLabel
     end
 
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique(rewardLabels); nrewards = length(rewards);
     difficulties = unique(difficultyLabels); ndifficulties = length(difficulties);
 
@@ -27,6 +27,6 @@ function VS_reward_size_success_rate(failedLabels, rewardLabels, difficultyLabel
     set(gca, 'fontsize', 16, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     ylim(options.Ylim);
     xlim([0.7, nrewards+0.3]); xticks(1:nrewards); xticklabels(rewardNames);
-    ylabel(options.Label); legend(["Tiny", "Huge"], Location="best"); set(gcf,'position',[0,0,550,550]);
+    ylabel(options.Label); legend(diffLegends, Location="best"); set(gcf,'position',[0,0,550,550]);
     saveas(gcf, options.OutputFolder+"-vs-Reward.jpg"); close all;
 end

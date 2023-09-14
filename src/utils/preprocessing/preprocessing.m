@@ -1,6 +1,6 @@
 
 clear all; close all;  addpath(genpath("../plotting/"));
-dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426", "0428"];
+dates = ["0417", "0419", "0420"];
 ndates = length(dates);
 % Global variables
 dataDir = "../../../data/raw/";
@@ -12,9 +12,7 @@ date = dates(day);
 rawFile = dir(dataDir + "*" + date + "*.mat");
 load(dataDir + rawFile.name); 
 outputFolder = processedDataDir + date + "/"; makeDir(outputFolder);
-if ~ismember(date, ["0216", "0405", "0414"])
-    datOutM1 = dat; clear dat;
-end
+datOutM1 = dat; clear dat;
 
 % the data structure
 % datOutM1: 1 * ntrials : struct array with the fields:

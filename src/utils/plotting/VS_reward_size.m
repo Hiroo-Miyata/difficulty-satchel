@@ -7,9 +7,10 @@ function VS_reward_size(data, rewardLabels, difficultyLabels, options)
         options.Label
         options.OutputFolder
         options.Ylim = nan
+        options.Size = nan
     end
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique(rewardLabels); nrewards = length(rewards);
     difficulties = unique(difficultyLabels); ndifficulties = length(difficulties);
 
@@ -22,11 +23,14 @@ function VS_reward_size(data, rewardLabels, difficultyLabels, options)
             Y(i) = mean(data(curInds));
             Yerr(i) = std(data(curInds)) / sqrt(sum(curInds));
         end
-        errorbar(1:nrewards, Y,Yerr, Color=diffColors(j, :), LineWidth=2);
+        errorbar(1:nrewards, Y,Yerr, Color=diffColors(j, :), LineWidth=4);
     end
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
-    xlim([0.7, nrewards+0.3]); xticks(1:nrewards); xticklabels(rewardNames); ylabel(options.Label); legend(["Tiny", "Huge"], Location="best");
+    xlim([0.7, nrewards+0.3]); xticks(1:nrewards); xticklabels(rewardNames); ylabel(options.Label); legend(diffLegends, Location="best");
     if ~isnan(options.Ylim); ylim(options.Ylim); end;
-    set(gcf,'position',[0,0,550,550]);
+    if isnan(options.Size)
+        set(gcf,'position',[0,0,550,550]);
+    else
+        set(gcf,'position',[0,0,options.Size(1), options.Size(2)]);
     saveas(gcf, options.OutputFolder+"-vs-Reward.jpg"); close all;
 end

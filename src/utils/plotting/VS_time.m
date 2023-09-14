@@ -9,9 +9,11 @@ function VS_time(data, rewardLabels, difficultyLabels, options)
         options.Xlim (1,2) double = nan
         options.Ylim = nan
         options.Timeperiod = nan
+        options.DiffLegendPos = "southwest"
+        options.RewLegendPos = "south"
     end
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique(rewardLabels); nrewards = length(rewards);
     difficulties = unique(difficultyLabels); ndifficulties = length(difficulties);
 
@@ -20,10 +22,12 @@ function VS_time(data, rewardLabels, difficultyLabels, options)
         options.Xlim = [0, timeBin];
         Xticks = [0, timeBin];
     else
-        if options.Xlim(1) < 0
-            Xticks = []
+        if options.Xlim(1) > 0
+            Xticks = [options.Xlim(1), options.Xlim(2)];
+            Xticklabels = [num2str(options.Xlim(1)), num2str(options.Xlim(2))];
         else
-            Xticks = [0, timeBin(end)];
+            Xticks = [options.Xlim(1), 0, options.Xlim(2)];
+            Xticklabels = [num2str(options.Xlim(1)), options.Timeperiod, num2str(options.Xlim(2))];
         end
     end
 
@@ -31,21 +35,24 @@ function VS_time(data, rewardLabels, difficultyLabels, options)
     figure; hold on;
     for j=1:ndifficulties
         for i=1:nrewards
-            Y = zeros(1, timeBin); Yerr = zeros(1, timeBin);
-            curInds = rewardLabels == rewards(i) & difficultyLabels == difficulties(j) & ~isnan(data);
-            Y = mean(data(:, curInds), 2);
+            curInds = rewardLabels == rewards(i) & difficultyLabels == difficulties(j);
+            Y = mean(data(:, curInds), 2)';
             % calculate 95%CI
-            Yerr = 1.96*std(data(:, curInds), 0, 2)/sqrt(sum(curInds));
+            Yerr = 1.96*std(data(:, curInds), 0, 2)/sqrt(sum(curInds)); Yerr = Yerr';
 
             % plot
-            plot(timeBin, Y, 'Color', rewColors(rewards(i), :), 'LineWidth', 2.5,  'LineStyle', DiffStyle(j));
-            fill([1:timeBin, timeBin:-1:1], [Y+Yerr, Y(end:-1:1)-Yerr(end:-1:1)], rewColors(rewards(i), :), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+            plot(options.Xlim(1):options.Xlim(2), Y, 'Color', rewColors(rewards(i), :), 'LineWidth', 2.5,  'LineStyle', DiffStyle(j));
+            lh(j) = plot(0, 0, 'Color', 'k', 'LineWidth', 2.5,  'LineStyle', DiffStyle(j));
+            lr(i) = plot(0, 0, 'Color', rewColors(rewards(i), :), 'LineWidth', 2.5);
+            fill([options.Xlim(1):options.Xlim(2), options.Xlim(2):-1:options.Xlim(1)], [Y+Yerr, Y(end:-1:1)-Yerr(end:-1:1)], rewColors(rewards(i), :), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
         end
     end
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
-    xlim(options.Xlim); xlabel("Time (ms)"); 
-    ylabel(options.Label); legend(["Tiny", "Huge"], Location="best");
-    if ~isnan(options.Ylim); ylim(options.Ylim); end;
+    xlim(options.Xlim); xticks(Xticks); xticklabels(Xticklabels);
+    ylabel(options.Label); ylim(options.Ylim);
     set(gcf,'position',[0,0,550,550]);
-    saveas(gcf, options.OutputFolder+"-vs-Reward.jpg"); close all;
+    legend(lh, diffLegends, Location=options.DiffLegendPos); ah1=axes('position',get(gca,'position'),'visible','off');
+    leg2=legend(ah1,lr,rewardLegends, Location=options.RewLegendPos);
+    set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
+    saveas(gcf, options.OutputFolder+"-vs-time.jpg"); close all;
 end

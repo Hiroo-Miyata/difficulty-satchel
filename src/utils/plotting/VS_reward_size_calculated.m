@@ -9,7 +9,7 @@ function VS_reward_size_calculated(Y, Yerr, options)
 
     label = options.Label; outputFolder = options.OutputFolder;
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique([1 2 3]); nrewards = length(rewards);
     difficulties = unique([0 1]); ndifficulties = length(difficulties);
 
@@ -22,7 +22,7 @@ function VS_reward_size_calculated(Y, Yerr, options)
         end
     end
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
-    xlim([0.7 3.3]); xticks(1:3); xticklabels(["S", "M", "L"]); ylabel(label); legend(["Tiny", "Huge"], Location="best");
+    xlim([0.7 nrewards+0.3]); xticks(1:nrewards); xticklabels(rewardNames); ylabel(label); legend(diffLegends, Location="best");
     set(gcf,'position',[0,0,550,550]);
     saveas(gcf, outputFolder+"-vs-Reward.jpg"); close all;
 end

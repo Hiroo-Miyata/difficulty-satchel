@@ -14,7 +14,7 @@ function VS_trial(trialNums, Y, rewardLabels, difficultyLabels, options)
         options.RewLegendPos = "south"
     end
 
-    [rewardNames, rewardLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
+    [rewardNames, rewardLegends, diffLegends, rewColors, diffColors, direColors, DiffStyle, DelayTimes, nDelayTimes] = getExperimentConstants();
     rewards = unique(rewardLabels); nrewards = length(rewards);
     difficulties = unique(difficultyLabels); ndifficulties = length(difficulties);
 
@@ -43,7 +43,7 @@ function VS_trial(trialNums, Y, rewardLabels, difficultyLabels, options)
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     xlabel("Trial Number"); ylabel(options.Label);
     set(gcf,'position',[0,0,options.FigWidth,550]);
-    legend(lh, ["Tiny", "Huge"], Location=options.DiffLegendPos); ah1=axes('position',get(gca,'position'),'visible','off');
+    legend(lh, diffLegends, Location=options.DiffLegendPos); ah1=axes('position',get(gca,'position'),'visible','off');
     leg2=legend(ah1,lr,rewardLegends, Location=options.RewLegendPos);
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     saveas(gcf, options.OutputFolder+"-vs-trial.jpg");

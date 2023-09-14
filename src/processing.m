@@ -1,6 +1,6 @@
 clear all;
 %% Input 
-dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426", "0428"];
+dates = ["0417", "0419", "0420"];
 for day = 1:length(dates)
 date = dates(day);
 rootDir = "../";

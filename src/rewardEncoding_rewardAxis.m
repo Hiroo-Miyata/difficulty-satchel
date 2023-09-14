@@ -1,7 +1,7 @@
 close all; clear all; addpath(genpath("./utils/plotting/"));
-dates = ["0216", "0405", "0414", "0417", "0418", "0419", "0420", "0425", "0426", "0427", "0428"];
+dates = ["0417", "0419", "0420"];
 ndates = length(dates);
-folderName = "202307w1-all/neuralData_GoCue";
+folderName = "202309-summary/neuralData_GoCue";
 
 Yall = cell(ndates, 2, 2, 8);
 for d = 1:ndates
