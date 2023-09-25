@@ -30,7 +30,7 @@ function VS_trial(trialNums, Y, rewardLabels, difficultyLabels, options)
         for i = 1:nrewards
             for j = 1:ndifficulties
                 curInds = rewardLabels == rewards(i) & difficultyLabels == difficulties(j) & dayLabels == dates(d) & ~isnan(Y);
-                smoothedY = movmean(Y(curInds), 5);
+                smoothedY = movmean(Y(curInds), 20);
                 plot(trialNums(curInds), smoothedY, 'Color', rewColors(rewards(i), :), 'LineWidth', 2.5,  'LineStyle', DiffStyle(j));
                 lh(j) = plot(0, 0, 'Color', 'k', 'LineWidth', 2.5,  'LineStyle', DiffStyle(j));
                 lr(i) = plot(0, 0, 'Color', rewColors(rewards(i), :), 'LineWidth', 2.5);

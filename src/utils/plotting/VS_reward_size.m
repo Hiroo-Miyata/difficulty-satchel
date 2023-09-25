@@ -32,5 +32,6 @@ function VS_reward_size(data, rewardLabels, difficultyLabels, options)
         set(gcf,'position',[0,0,550,550]);
     else
         set(gcf,'position',[0,0,options.Size(1), options.Size(2)]);
+    end
     saveas(gcf, options.OutputFolder+"-vs-Reward.jpg"); close all;
 end

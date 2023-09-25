@@ -107,7 +107,7 @@ codes.DIODE_OFF = 7 ;
 %
 codes.NO_STIM = 9;
 codes.STIM_ON = 10 ;
-codes.STIM1_ON = 11 ;
+codes.STIM1_ON = 11 ; %GC
 codes.STIM2_ON = 12 ;
 codes.STIM3_ON = 13 ;
 codes.STIM4_ON = 14 ;
@@ -128,7 +128,7 @@ codes.STIM7_OFF = 47 ;
 codes.STIM8_OFF = 48 ;
 codes.STIM9_OFF = 49 ;
 codes.STIM10_OFF = 50 ;
-codes.TARG_ON = 70 ;
+codes.TARG_ON = 70 ; %TO
 codes.TARG1_ON = 71 ;
 codes.TARG2_ON = 72 ;
 codes.TARG3_ON = 73 ;
@@ -171,25 +171,25 @@ codes.SOUND_OFF = 133 ;
 codes.SOUND_CHANGE = 134;
 
 % behavior codes
-codes.FIXATE  = 140 ;	% attained fixation 
+codes.FIXATE  = 140 ;	% attained fixation before TO
 codes.SACCADE = 141 ;	% initiated saccade
 
 % trial outcome codes
-codes.CORRECT = 150 ;	% Independent of whether reward is given
-codes.IGNORED = 151 ;	% Never fixated or started trial
-codes.BROKE_FIX = 152 ; % Left fixation before trial complete
-codes.WRONG_TARG = 153 ; % Chose wrong target???
-codes.BROKE_TARG = 154 ; % Left target fixation before required time
-codes.MISSED = 155 ;	% for a detection task
-codes.FALSEALARM = 156 ;
+codes.CORRECT = 150 ;	% Independent of whether reward is given <= success
+codes.IGNORED = 151 ;	% Never fixated or started trial <= quit trial
+codes.BROKE_FIX = 152 ; % Left fixation before trial complete <= quit trial
+codes.WRONG_TARG = 153 ; % Chose wrong target??? <= during reaching
+codes.BROKE_TARG = 154 ; % Left target fixation before required time <= during time hold period
+codes.MISSED = 155 ;	% for a detection task <= 500 ms limit exceed after GC
+codes.FALSEALARM = 156 ; % <= during catch trials 
 codes.NO_CHOICE = 157 ;	% saccade to non-target / failure to leave fix window
 codes.WITHHOLD = 158 ; % correctly-withheld response
 codes.ACQUIRE_TARG = 159 ; % Acquired the target
-codes.FALSE_START = 160 ; % left too early
+codes.FALSE_START = 160 ; % left too early <= happened during real trial
 codes.BCI_CORRECT = 161 ; % BCI task (vs. non-BCI behavior) performed correct
 codes.BCI_MISSED = 162 ; % BCI task (vs. non-BCI behavior) performed incorrectly 
-codes.CORRECT_REJECT = 163 ;
-codes.LATE_CHOICE = 164 ;
+codes.CORRECT_REJECT = 163 ; % catch task 
+codes.LATE_CHOICE = 164 ; 
 
 %%
 % retry.CORRECT = 0 ;	% Independent of whether reward is given

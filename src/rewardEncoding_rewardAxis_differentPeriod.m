@@ -1,17 +1,23 @@
 close all; clear all; addpath(genpath("./utils/plotting/"));
-dates = ["0417", "0419", "0420"];
+
+
+[dates, rootFolder, axisOutputFileNames, processedFileNames, analysisBin, params] = pp_getParam("Dataset", "BL", "timeperiod", "MO", "neuralDataType", "non_stitched");
 ndates = length(dates);
-folderName = "202307w1-all/neuralData_TargetHold";
+rewardAxisPeriod = "TO";
+
+Yall = cell(ndates, 3, 2, 8);
 
 for d = 1:ndates
 date = dates(d);
-rootDir = "../";
-load(rootDir+"data/processed/"+date+"_HT_200_375_11159.mat");
-outputFolder = "../results/"+folderName+"/projection-2D_GCrewardAxis/"; makeDir(outputFolder); 
-outputFolderProjection = "../results/"+folderName+"/rewardAxis-projection_GCrewardAxis/"; makeDir(outputFolderProjection);
-outputFolderStretching = "../results/"+folderName+"/stretching_GCrewardAxis/"; makeDir(outputFolderStretching);
-analysisBin = (350:550); % Pay Attention!! HT=(350:550), GC=(50:250), TO=(400:600)
-axisOutputFileName = rootDir+"/interim/nonstitched_GC_rewardAxis_"+date+".mat";
+load(processedFileNames(d));
+axisOutputFileName = "../interim/"+ params.neuralDataType+"_"+rewardAxisPeriod+"_rewardAxis_"+dates(d)+".mat";
+
+outputFolder = rootFolder + "/projection-2D-eachday-"+rewardAxisPeriod+"rewardAxis/"; makeDir(outputFolder); 
+outputFolderProjection = rootFolder + "/rewardAxis-projection-eachday-"+rewardAxisPeriod+"rewardAxis/"; makeDir(outputFolderProjection);
+outputFolderStretching = rootFolder + "/stretching-eachday-"+rewardAxisPeriod+"rewardAxis/"; makeDir(outputFolderStretching);
+outputFolder = outputFolder + date;
+outputFolderProjection = outputFolderProjection + date;
+outputFolderStretching = outputFolderStretching + date;
 
 % remove calibration part 
 trialNums = [trialData.trial];
@@ -26,11 +32,20 @@ diffColors  = [0 0.447 0.741; 0.466 0.674 0.188]; %tiny huge: blue and green
 direColors = {[1 .5 .5],[.75 .75 .5],[.5 1 .5],[.25 .75 .5],[0 .5 .5],[0.25 0.25 .5],[0.5 0 .5],[0.75 0.25 .5]};
 trialNums =  [trialData.trial]; 
 
+% % Get data and avg within dir x rew
+% neuralActivity = cat(3, trialData(:).firingRates);
+% neuralData = mean(neuralActivity(:, analysisBin, :), 2);
+% neuralData = squeeze(neuralData)';
+% [ntrials,nneurons] = size(neuralData);
+
 % Get data and avg within dir x rew
 neuralActivity = cat(3, trialData(:).firingRates);
-neuralData = mean(neuralActivity(:, analysisBin, :), 2);
-neuralData = squeeze(neuralData)';
-[ntrials,nneurons] = size(neuralData);
+[nneurons, ntimeBins, ntrials] = size(neuralActivity);
+neuralData = nan(ntrials, nneurons);
+for i = 1:ntrials
+    movementOnset = int16(reactionTimes(i)) + 200;
+    neuralData(i, :) = squeeze(mean(neuralActivity(:, movementOnset+0:movementOnset+200, i), 2));
+end
 
 load(axisOutputFileName)
 
@@ -92,4 +107,77 @@ for k=1:3 % 1:2
 end
 
 close all;
+
+neuralData_onDPC = (neuralData - mean(neuralData, 1)) * wR(:,1);
+for i=1:nrewards
+    for j=1:ndifficulties
+        for k=1:ndirections
+            curInds = rewardLabels==rewards(i) & difficultyLabels==difficulties(j) & directionLabels==directions(k);
+            Yall{d, i, j, k} = neuralData_onDPC(curInds, 1);
+        end
+    end
+end
+
+
+%% Reward Axis
+neuralData_onDPC = (neuralData - meanFiringRates) * wR(:,1);
+
+VS_reward_size(neuralData_onDPC', rewardLabels, difficultyLabels, "Label", "Reward Axis (spikes/s)", "OutputFolder", outputFolder+"RewardAxis")
+% VS_delay_time(neuralData_onDPC', rewardLabels, difficultyLabels, delayTimes, "Label", "Reward Axis (spikes/s)", "OutputFolder", outputFolder+"RewardAxis")
+VS_direction(neuralData_onDPC', rewardLabels, difficultyLabels, directionLabels, "Label", "Reward Axis (spikes/s)", "OutputFolder", outputFolder+"RewardAxis")
+VS_trial(trialNums, neuralData_onDPC', rewardLabels, difficultyLabels, "Label", "Reward Axis (spikes/s)", "OutputFolder", outputFolder+"RewardAxis", ...
+            "IsMultipleDays",false)
+
+%% trajectory
+addpath(genpath("./utils/processing/"));
+neuralActivity_onDPC = zeros(size(neuralActivity, 2), ntrials);
+[neuralActivity_smoothed, ~, ~, ~] = kernelSmooth(double(neuralActivity));
+for i = 1:ntrials
+    trajectory = squeeze(neuralActivity_smoothed(:, :, i))';
+    neuralActivity_onDPC(:, i) = (trajectory - meanFiringRates) * wR(:,1);
+end
+VS_time(neuralActivity_onDPC, rewardLabels, difficultyLabels, "Label", "Reward Axis (spikes/s)", "OutputFolder", outputFolder+"RewardAxis", "Ylim", [-60 60], ...
+    "Timeperiod", params.timeperiod, "Xlim", params.Xlim, "DiffLegendPos", "southwest", "RewLegendPos", "southeast");
+
+
+
+
+
+end
+
+
+
+
+%% stretching
+
+rewardAxisRaw = Yall;
+rewardAxisMean = zeros(size(Yall));
+rewardAxisStd  = zeros(size(Yall));
+for d=1:ndates
+    for j=1:ndifficulties
+        for i=1:nrewards
+            for k=1:ndirections
+                Ys = Yall{d,i,j,k};
+                rewardAxisMean(d,i,j,k) = mean(Ys);
+                rewardAxisStd(d,i,j,k)  = std(Ys) / sqrt(length(Ys));
+            end
+        end
+    end
+end
+
+
+comprisons = [3 1];
+comprisonsName = ["L_vs_S"];
+for k = 1:1
+    X = zeros(ndates,ndirections);
+    Y = zeros(ndates,ndirections);
+    for i = 1:ndates
+        for j = 1:ndirections
+            X(i,j) = rewardAxisMean(i,comprisons(k, 1),1,j) - rewardAxisMean(i,comprisons(k, 2),1,j);
+            Y(i,j) = rewardAxisMean(i,comprisons(k, 1),2,j) - rewardAxisMean(i,comprisons(k, 2),2,j);
+        end
+    end
+    rankTest2d(X(:), Y(:), "XLabel", "Reward axis range, Tiny targets (Spikes/s)", ...
+                "YLabel", "Reward axis range, Huge targets (Spikes/s)", ...
+                "OutputFolder", outputFolderStretching+"-stretch-"+comprisonsName(k))
 end

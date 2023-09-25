@@ -87,8 +87,8 @@ taskInfo.directions = unique(directionLabels);
 taskInfo.targetSizes = unique(targetSizeLabels);
 taskInfo.focusDifficulties = unique(focusDifficultyLabels);
 
-channelLabels = datOutM1(1).channels(:,1);
-taskInfo.channels = unique(channelLabels);
+channelLabels = datOutM1(1).channels(:,1:2);
+taskInfo.channels = channelLabels;
 
 %%%%%
 %for me
@@ -121,7 +121,7 @@ for i = 1:ntrials
 
     ntime = ceil((datOutM1(i).time(2)-datOutM1(i).time(1))*newFs);
     nchannel = length(taskInfo.channels);
-    firingRate = logical(zeros(nchannel,ntime));
+    firingRate = false(nchannel,ntime);
     startTimeFs = ceil(datOutM1(i).time(1)*fs);
 
     % make a spike time array based on the spikeinfo
@@ -138,8 +138,8 @@ for i = 1:ntrials
             continue;
         end
 
-        channel = datOutM1(i).spikeinfo(j,1);
-        channelLabel = find(taskInfo.channels == channel);
+        channel = datOutM1(i).spikeinfo(j,1:2);
+        channelLabel = find(taskInfo.channels(:,1) == channel(1) & taskInfo.channels(:,2) == channel(2));
         if spikeTime > 0 && spikeTime <= ntime
             % if there is a spike in the same time, it will be ignored but output a warning
             if firingRate(channelLabel,spikeTime) == 1

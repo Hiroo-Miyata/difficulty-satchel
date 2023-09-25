@@ -49,7 +49,10 @@ function VS_time(data, rewardLabels, difficultyLabels, options)
     end
     set(gca, 'fontsize', 20, 'fontname', 'arial', 'tickdir', 'out', 'fontweight', 'bold');
     xlim(options.Xlim); xticks(Xticks); xticklabels(Xticklabels);
-    ylabel(options.Label); ylim(options.Ylim);
+    ylabel(options.Label);
+    if ~isnan(options.Ylim)
+        ylim(options.Ylim);
+    end
     set(gcf,'position',[0,0,550,550]);
     legend(lh, diffLegends, Location=options.DiffLegendPos); ah1=axes('position',get(gca,'position'),'visible','off');
     leg2=legend(ah1,lr,rewardLegends, Location=options.RewLegendPos);
